@@ -1,0 +1,153 @@
+# WAP_INT - ready-made requests
+# Open in VS Code with the "REST Client" extension, or copy the curl equivalents
+# from the README. Change @to to your own test number first.
+
+@host = http://localhost:3000
+@to = 919876543210
+
+### Liveness
+GET {{host}}/health
+
+### Endpoint index
+GET {{host}}/
+
+### Send plain text
+POST {{host}}/api/messages/text
+Content-Type: application/json
+
+{
+  "to": "{{to}}",
+  "text": "Hello from WAP_INT"
+}
+
+### Send text with link preview
+POST {{host}}/api/messages
+Content-Type: application/json
+
+{
+  "to": "{{to}}",
+  "type": "text",
+  "text": "Docs: https://developers.facebook.com/docs/whatsapp",
+  "previewUrl": true
+}
+
+### Send the pre-approved hello_world template
+POST {{host}}/api/messages/template
+Content-Type: application/json
+
+{
+  "to": "{{to}}",
+  "name": "hello_world",
+  "language": "en_US"
+}
+
+### Send an image by URL
+POST {{host}}/api/messages
+Content-Type: application/json
+
+{
+  "to": "{{to}}",
+  "type": "image",
+  "image": { "link": "https://picsum.photos/600/400", "caption": "Random image" }
+}
+
+### Send reply buttons
+POST {{host}}/api/messages
+Content-Type: application/json
+
+{
+  "to": "{{to}}",
+  "type": "buttons",
+  "body": "Do you want to continue?",
+  "header": "Confirmation",
+  "footer": "WAP_INT",
+  "buttons": [
+    { "id": "yes", "title": "Yes" },
+    { "id": "no", "title": "No" }
+  ]
+}
+
+### Raw Graph API payload (escape hatch)
+POST {{host}}/api/messages/raw
+Content-Type: application/json
+
+{
+  "to": "{{to}}",
+  "type": "text",
+  "text": { "preview_url": false, "body": "Sent through the raw endpoint" }
+}
+
+### Recent inbound messages held in memory
+GET {{host}}/api/messages/recent?limit=10
+
+### Counters since startup
+GET {{host}}/api/stats
+
+### Verify token + phone number id against the Graph API
+GET {{host}}/api/profile
+
+### Simulate Meta's verification handshake (should echo 12345)
+GET {{host}}/webhook?hub.mode=subscribe&hub.verify_token=change-me-to-a-random-string&hub.challenge=12345
+
+### Simulate an inbound text message
+# Works only when VERIFY_SIGNATURE=false, or without WHATSAPP_APP_SECRET set.
+POST {{host}}/webhook
+Content-Type: application/json
+
+{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "1234567890",
+      "changes": [
+        {
+          "field": "messages",
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": { "display_phone_number": "15550001111", "phone_number_id": "111111111111111" },
+            "contacts": [{ "profile": { "name": "Test User" }, "wa_id": "{{to}}" }],
+            "messages": [
+              {
+                "from": "{{to}}",
+                "id": "wamid.TEST123",
+                "timestamp": "1737000000",
+                "type": "text",
+                "text": { "body": "Hello from the simulated webhook" }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+
+### Simulate a delivery status update
+POST {{host}}/webhook
+Content-Type: application/json
+
+{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "1234567890",
+      "changes": [
+        {
+          "field": "messages",
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": { "display_phone_number": "15550001111", "phone_number_id": "111111111111111" },
+            "statuses": [
+              {
+                "id": "wamid.TEST123",
+                "status": "delivered",
+                "timestamp": "1737000005",
+                "recipient_id": "{{to}}"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

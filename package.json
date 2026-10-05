@@ -1,0 +1,33 @@
+{
+  "name": "wap-int",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Console-only WhatsApp Cloud API integration - inbound webhook + outbound send API",
+  "type": "module",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "send": "node src/cli/send.js",
+    "chat": "node src/cli/chat.js",
+    "tunnel": "node scripts/tunnel.js",
+    "tunnel:ngrok": "node scripts/tunnel.js ngrok",
+    "tunnel:cloudflared": "node scripts/tunnel.js cloudflared",
+    "check": "node scripts/check-config.js"
+  },
+  "keywords": [
+    "whatsapp",
+    "whatsapp-cloud-api",
+    "webhook",
+    "meta",
+    "express"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
+}
